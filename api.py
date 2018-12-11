@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 from models import Filmsq
 from authlib.flask.oauth2 import AuthorizationServer
 import os
-import jwt
+from authlib.specs.rfc7519 import jwt
 
 
 app = Flask(__name__)
@@ -12,6 +12,9 @@ api = Api(app)
 #Pablo
 token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiUGFibG8ifQ.R4W-V2MKib5vuApe8wvFOGb7j61WhvtV2ElTh5_WOrU'
 
+
+header = {'alg': 'HS256'}
+key = 'SECRET'
 #os.environ['AUTHLIB_INSECURE_TRANSPORT'] = 'true'
 # pelicula1 = Filmsq('Avatar', 300)
 # print(pelicula1.__dict__)
@@ -28,9 +31,9 @@ class Users(Resource):
                     #'id': id,
                     'name': name,
             }
-            encoded_token = jwt.encode(payload, 'SECRET', algorithm='HS256')
+            encoded_token = jwt.encode(header, payload, key)
 
-            return print(encoded_token), print(jwt.decode(encoded_token, 'SECRET', algorithm='HS256'))
+            return print(encoded_token), print(jwt.decode(encoded_token, key))
 
         else:
             return 404
@@ -70,7 +73,7 @@ for film in films:
 
 # Utilizar la clase models
 def pruebaz(name):
-    #films.append(filmf)
+    #films.append(filmf)>
     return name
 
 # Clase prueba para ver como controlar los enlaces FUNCIONA
@@ -84,17 +87,23 @@ class Films(Resource):
 
     #Devuelve 1 sola pelicula si existe
     def get(self, name, token):
-        payload = jwt.decode(token, 'SECRET', algorithm='HS256')
+        payload = jwt.decode(token, key)
         # Si tras decodificar ese usuario existe..
-        for user in users:
-            if user['name'] == payload['name']:
+        if verificar(token):
                 #Comprobamos que existe la pelicula
-                for film in films:
-                    if name == film['tittle']:
-                        return {"GET":film}, 200
-                    return {"No existe la pelicula":name}
+            for film in films:
+                if name == film['tittle']:
+                    return {"GET":film}, 200
+                return {"No existe la pelicula":name}
         #Si no existe
         return {"No tienes permiso para acceder": token} #No se porque no me devuelve esto
+
+def verificar(token):
+    payload = jwt.decode(token, key)
+    for user in users:
+        if user['name'] == payload['name']:
+            return True
+    return False
 
 
 class Films2(Resource):

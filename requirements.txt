@@ -2,4 +2,4 @@ keras
 tensorflow
 flask
 flask_restful
-pyjwt
+authlib
