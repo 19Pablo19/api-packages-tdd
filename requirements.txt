@@ -1,5 +1,0 @@
-keras
-tensorflow
-flask
-flask_restful
-authlib
